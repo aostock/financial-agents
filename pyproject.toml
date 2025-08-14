@@ -23,6 +23,7 @@ dependencies = [
     "langchain-litellm>=0.2.2",
     "langchain-mcp-adapters>=0.1.9",
     "litellm[proxy]>=1.75.2",
+    "httpx[socks]>=0.28.1",
 ]
 
 [build-system]
