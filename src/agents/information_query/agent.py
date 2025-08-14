@@ -17,19 +17,8 @@ from common.util import get_latest_message_content
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from llm.llm_model import ainvoke_with_tools, ainvoke
 from pydantic_core import ArgsKwargs
+from common.dataset import Dataset
 
-client = MultiServerMCPClient(
-    {
-        "financial_data": {
-            # Ensure you start your financial data server on port 8000
-            "url": "http://127.0.0.1:8000/mcp",
-            "headers": {
-                "Authorization":"Bearer secret-token"
-            },
-            "transport": "streamable_http",
-        }
-    }
-)
 
 async def query(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     """Prepare the query for the MCP call.
@@ -67,6 +56,20 @@ async def call_mcp(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
         A dictionary with messages and action
     """
     try:
+        dataset_client = Dataset(config)
+        client = MultiServerMCPClient(
+            {
+                "financial_data": {
+                    # Ensure you start your financial data server on port 8000
+                    "url": f"{dataset_client.remote_dataset_url}/mcp",
+                    "headers": {
+                        "Authorization":f"Bearer {dataset_client.remote_dataset_token}"
+                    },
+                    "transport": "streamable_http",
+                }
+            }
+        )
+
         # Get tools from the financial_data MCP
         tools = await client.get_tools()
         
